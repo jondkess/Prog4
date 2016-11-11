@@ -76,6 +76,8 @@ class NetworkPacket:
         data_S = byte_S[NetworkPacket.dst_addr_S_length + NetworkPacket.prot_S_length : ]        
         return self(dst_addr, prot_S, data_S)
     
+class Message:
+    def __init__(self:
 
     
 
