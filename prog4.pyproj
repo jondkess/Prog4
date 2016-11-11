@@ -5,7 +5,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{22727ac4-0e5c-4102-b017-2c9cd78eb0b7}</ProjectGuid>
     <ProjectHome />
-    <StartupFile>link.py</StartupFile>
+    <StartupFile>simulation.py</StartupFile>
     <SearchPath />
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
