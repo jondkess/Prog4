@@ -178,13 +178,28 @@ class Router:
     def update_routes(self, p):
         #TODO: add logic to update the routing tables and
         # possibly send out routing updates
-        print('%s: Received routing update %s' % (self, p))
+        print("____ {} ___ {}".format(p.data_S, self.rt_tbl_D))
+        print('%s: Received routing update %s\n' % (self, p))
+        #self.name is current router
+        #self.out_intf_L is our neighbors
+        #N` = {u}
+        #for all nodes V:
+        #    if V is a neighbor of u:
+        #        D(v) = c(u, v)
+        #    else:
+        #        D(v) = MAX_INT
+                 
         
     ## send out route update
     # @param i Interface number on which to send out a routing update
     def send_routes(self, i):
         # a sample route update packet
-        p = NetworkPacket(0, 'control', 'Sample routing table packet')
+        msg = ""
+        for key in self.rt_tbl_D.keys():
+            for dest, cost in self.rt_tbl_D.get(key).items():
+                msg += "{}-{}:{},".format(self.name, key, cost) 
+
+        p = NetworkPacket(0, 'control', msg)
         try:
             #TODO: add logic to send out a route update
             self.out_intf_L[i].put(p.to_byte_S(), True)
