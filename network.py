@@ -75,11 +75,6 @@ class NetworkPacket:
             raise('%s: unknown prot_S field: %s' %(self, prot_S))
         data_S = byte_S[NetworkPacket.dst_addr_S_length + NetworkPacket.prot_S_length : ]        
         return self(dst_addr, prot_S, data_S)
-    
-class Message:
-    def __init__(self:
-
-    
 
 ## Implements a network host for receiving and transmitting data
 class Host:
@@ -180,10 +175,15 @@ class Router:
     def update_routes(self, p):
         #TODO: add logic to update the routing tables and
         # possibly send out routing updates
-        print("____ {} ___ {}".format(p.data_S, self.rt_tbl_D))
+        inter = int(p.data_S[0])
+        dest = int(p.data_S[2])
+        cost = int(p.data_S[4])
+        print("____ {} ___ {}".format(cost, self.rt_tbl_D))
         print('%s: Received routing update %s\n' % (self, p))
-        #self.name is current router
-        #self.out_intf_L is our neighbors
+        if dest in self.rt_tbl_D.keys():
+            print("welp")
+        else:
+            self.rt_tbl_D[dest] = {inter : cost}
         #N` = {u}
         #for all nodes V:
         #    if V is a neighbor of u:
@@ -197,9 +197,9 @@ class Router:
     def send_routes(self, i):
         # a sample route update packet
         msg = ""
-        for key in self.rt_tbl_D.keys():
-            for dest, cost in self.rt_tbl_D.get(key).items():
-                msg += "{}-{}:{},".format(self.name, key, cost) 
+        for dest in self.rt_tbl_D.keys():
+            for inter, cost in self.rt_tbl_D.get(dest).items():
+                msg += "{}-{}:{},".format(inter, dest, cost) 
 
         p = NetworkPacket(0, 'control', msg)
         try:
