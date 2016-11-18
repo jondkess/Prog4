@@ -185,8 +185,8 @@ class Router:
         else:
             self.rt_tbl_D[dest] = {inter : cost}
         #N` = {u}
-        #for all nodes V:
-        #    if V is a neighbor of u:
+        #for keys in V:
+        #    if V in u:
         #        D(v) = c(u, v)
         #    else:
         #        D(v) = MAX_INT
