@@ -5,6 +5,7 @@ Created on Oct 12, 2016
 '''
 import queue
 import threading
+import re
 
 
 ## wrapper class for a queue of packets
@@ -34,6 +35,7 @@ class Interface:
 # the fields necessary for the completion of this assignment.
 class NetworkPacket:
     ## packet encoding lengths 
+    length_length = 8
     dst_addr_S_length = 5
     prot_S_length = 1
     
@@ -117,8 +119,33 @@ class Host:
             if(self.stop):
                 print (threading.currentThread().getName() + ': Ending')
                 return
+class Message:
+    def __init__(self, update_table):
+        self.update_table = update_table
+
+    def to_byte(rt_tbl_d):
+        msg = ""
+        for key in rt_tbl_d.keys():
+                for dest, cost in rt_tbl_d.get(key).items():
+                    msg+="{}-{}:{},".format(key, dest, cost)
+        print("msg is: " + msg)
+        return msg
+
+    def from_byte(self, msg):
+        route_table = {}
+        while(len(msg) > 0):
+            matchObj = re.match(r'(.)-(.):(\d+),', msg)
+            if matchObj:
+                route_table[matchObj.group(1)] = {matchObj.group(2): matchObj.group(3)}
+                msg = msg[len(matchObj.group()):]
+            else:
+                msg = msg[1:]
+        print("Route table is: " + str(route_table))
+        return self(route_table)
         
 
+        
+        
 
 ## Implements a multi-interface router described in class
 class Router:
