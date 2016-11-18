@@ -184,7 +184,7 @@ class Router:
     # @param i Interface number on which to send out a routing update
     def send_routes(self, i):
         # a sample route update packet
-        p = NetworkPacket(0, 'control', 'Sample routing table packet')
+        p = NetworkPacket(self, 'control', 'Sample routing table packet')
         try:
             #TODO: add logic to send out a route update
             self.out_intf_L[i].put(p.to_byte_S(), True)
