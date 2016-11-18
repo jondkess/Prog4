@@ -61,7 +61,7 @@ if __name__ == '__main__':
     for i in range(1):
         client.udt_send(2, 'Sample client data %d' % i)
         sleep(simulation_time)
-        server.udt_send(1, 'Sample server data %d' % i)
+        server.udt_send(1, 'Reply server data %d' % i)
         
     #give the network sufficient time to transfer all packets before quitting
     sleep(simulation_time)
