@@ -11,39 +11,58 @@ import sys
 
 ##configuration parameters
 router_queue_size = 0 #0 means unlimited
-simulation_time = 10 #give the network sufficient time to transfer all packets before quitting
+simulation_time = 15 #give the network sufficient time to transfer all packets before quitting
 
 if __name__ == '__main__':
     object_L = [] #keeps track of objects, so we can kill their threads
     
     #create network hosts
-    client = network.Host(1)
-    object_L.append(client)
-    server = network.Host(2)
-    object_L.append(server)
+    host1 = network.Host(1)
+    object_L.append(host1)
+    host2 = network.Host(2)
+    object_L.append(host2)
+    host3 = network.Host(3)
+    object_L.append(host3)
+
     
     #create routers and routing tables for connected clients (subnets)
-    router_a_rt_tbl_D = {1: {0: 1}} # packet to host 1 through interface 0 for cost 1
+    router_a_rt_tbl_D = {'1': {1: 1}, '2': {0: 9}} # packet to host 1 through interface 0 for cost 1
     router_a = network.Router(name='A', 
-                              intf_cost_L=[1,1], 
+                              intf_cost_L=[9,1,1,2], 
                               rt_tbl_D = router_a_rt_tbl_D, 
                               max_queue_size=router_queue_size)
     object_L.append(router_a)
-    router_b_rt_tbl_D = {2: {1: 3}} # packet to host 2 through interface 1 for cost 3
+    router_b_rt_tbl_D = {} # packet to host 2 through interface 1 for cost 3
     router_b = network.Router(name='B', 
-                              intf_cost_L=[1,3], 
+                              intf_cost_L=[2,1], 
                               rt_tbl_D = router_b_rt_tbl_D, 
                               max_queue_size=router_queue_size)
     object_L.append(router_b)
+    router_c_rt_tbl_D = {} # packet to host 1 through interface 0 for cost 1
+    router_c = network.Router(name='C', 
+                              intf_cost_L=[1,2], 
+                              rt_tbl_D = router_c_rt_tbl_D, 
+                              max_queue_size=router_queue_size)
+    object_L.append(router_c)
+    router_d_rt_tbl_D = {'3': {2: 1}} # packet to host 1 through interface 0 for cost 1
+    router_d = network.Router(name='D', 
+                              intf_cost_L=[1,2,1], 
+                              rt_tbl_D = router_d_rt_tbl_D, 
+                              max_queue_size=router_queue_size)
+    object_L.append(router_d)
     
     #create a Link Layer to keep track of links between network nodes
     link_layer = link.LinkLayer()
     object_L.append(link_layer)
     
     #add all the links
-    link_layer.add_link(link.Link(client, 0, router_a, 0))
-    link_layer.add_link(link.Link(router_a, 1, router_b, 0))
-    link_layer.add_link(link.Link(router_b, 1, server, 0))
+    link_layer.add_link(link.Link(host1, 0, router_a, 1))
+    link_layer.add_link(link.Link(host2, 0, router_a, 0))
+    link_layer.add_link(link.Link(router_a, 2, router_b, 0))
+    link_layer.add_link(link.Link(router_a, 3, router_c, 0))
+    link_layer.add_link(link.Link(router_b, 1, router_d, 1))
+    link_layer.add_link(link.Link(router_c, 1, router_d, 0))
+    link_layer.add_link(link.Link(router_d, 2, host3, 0))
     
     
     #start all the objects
@@ -55,19 +74,20 @@ if __name__ == '__main__':
         t.start()
     
     #send out routing information from router A to router B interface 0
-    router_a.send_routes(1)
-    
+    router_a.send_routes(2)
+    sleep(25)
     #create some send events    
-    for i in range(1):
-        client.udt_send(2, 'Sample client data %d' % i)
-        sleep(simulation_time)
-        server.udt_send(1, 'Reply server data %d' % i)
+    host1.udt_send(3, 'Sample host1 data %d' % 1)
+    sleep(simulation_time)
+    host3.udt_send(1, 'Reply host3 data %d' % 1)
         
     #give the network sufficient time to transfer all packets before quitting
     sleep(simulation_time)
     
     #print the final routing tables
     for obj in object_L:
+        if str(type(obj)) != "<class 'network.Router'>":
+            obj.stop = True
         if str(type(obj)) == "<class 'network.Router'>":
             obj.print_routes()
     

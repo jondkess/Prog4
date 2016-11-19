@@ -5,7 +5,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{22727ac4-0e5c-4102-b017-2c9cd78eb0b7}</ProjectGuid>
     <ProjectHome />
-    <StartupFile>simulation.py</StartupFile>
+    <StartupFile>simulation_1.py</StartupFile>
     <SearchPath />
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
@@ -21,9 +21,9 @@
     <PtvsTargetsFile>$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets</PtvsTargetsFile>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="link.py" />
-    <Compile Include="network.py" />
-    <Compile Include="simulation.py" />
+    <Compile Include="link_1.py" />
+    <Compile Include="network_1.py" />
+    <Compile Include="simulation_1.py" />
   </ItemGroup>
   <Import Project="$(PtvsTargetsFile)" Condition="Exists($(PtvsTargetsFile))" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.Common.targets" Condition="!Exists($(PtvsTargetsFile))" />

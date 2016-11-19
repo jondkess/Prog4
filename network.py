@@ -185,8 +185,15 @@ class Router:
             # TODO: Here you will need to implement a lookup into the 
             # forwarding table to find the appropriate outgoing interface
             # for now we assume the outgoing interface is (i+1)%2
-            self.intf_L[(i+1)%2].put(p.to_byte_S(), 'out', True)
-            print('%s: forwarding packet "%s" from interface %d to %d\n' % (self, p, i, (i+1)%2))
+            items = self.rt_tbl_D.get(str(p.dst_addr))
+            interface = 0
+            cost = 100
+            for j in items.keys():
+                if items.get(j) < cost:
+                    cost = items.get(j)
+                    interface = j
+            self.intf_L[interface].put(p.to_byte_S(), 'out', True)
+            print('%s: forwarding packet "%s" from interface %d to %d\n' % (self, p, int(interface), int(i)))
         except queue.Full:
             print('%s: packet "%s" lost on interface %d\n' % (self, p, i))
             pass
@@ -198,21 +205,34 @@ class Router:
         #TODO: add logic to update the routing tables and
         # possibly send out routing updates
         msg = Message.from_byte(Message, p.data_S)
-        if (msg.origin not in self.rt_tbl_D.keys()):
-            changed = True
-            self.insert(msg.origin, i, self.intf_L[i].cost)
-
+        if (self.name not in self.rt_tbl_D.keys()):
+            for interface in range(len(self.intf_L)):
+                self.insert(self.name, interface, 0)
         for host in msg.update_table.keys():
-            if host not in str(self.rt_tbl_D.keys()) and host != self.name:
-                changed = True
-                self.insert(host, i, self.intf_L[i].cost + int(msg.update_table.get(host).get(msg.origin)))
+            least_cost = 100
+            for interface in range(len(self.intf_L)):
+                if host not in self.rt_tbl_D.keys():
+                    self.insert(str(host), interface, 100)
+                    changed = True
+                elif(interface not in self.rt_tbl_D[host].keys()):
+                    self.insert(str(host), interface, 100)  
+                    changed = True          
+            for interf in msg.update_table[host].keys():
+                if msg.update_table[host][interf] + self.intf_L[i].cost < self.rt_tbl_D[host][i]:
+                    changed = True
+                    self.rt_tbl_D[host][i] = msg.update_table[host][interf] + self.intf_L[i].cost
+                #except:
+                 #   print("sup")
         print('%s: Received routing update %s from interface %d\n' % (self, p, i))
         if(changed):
             for interface in range(len(self.intf_L)):
                 self.send_routes(interface)
     
     def insert(self, host, interface, cost):
-        self.rt_tbl_D[host] = {interface: cost}
+        if host in self.rt_tbl_D.keys():
+            self.rt_tbl_D[host].update({interface: cost})
+        else:
+            self.rt_tbl_D[host] = {interface: cost}
 
     ## send out route update
     # @param i Interface number on which to send out a routing update
@@ -241,7 +261,7 @@ class Router:
         for interface in range(len(self.intf_L)):
             line = " "
             for j in self.rt_tbl_D.keys():
-                if interface in self.rt_tbl_D[j].keys():
+                if interface in self.rt_tbl_D[j].keys() and self.rt_tbl_D[j].get(interface) is not 100:
                     line +="{} ".format(self.rt_tbl_D[j].get(interface))
                 else:
                     line += "~ "
@@ -275,7 +295,8 @@ class Message:
             matchObj = re.match(r'(.)-(.):(\d+),', msg)
             if matchObj:
                 origin = matchObj.group(2)
-                route_table[matchObj.group(1)] = {matchObj.group(2): matchObj.group(3)}
+                group1 = matchObj.group(1)
+                route_table[group1] = {matchObj.group(2): int(matchObj.group(3))}
                 msg = msg[len(matchObj.group()):]
             else:
                 msg = msg[1:]
